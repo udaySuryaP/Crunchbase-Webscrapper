@@ -16,8 +16,6 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
 # Function to install packages
-
-
 def install_packages():
     packages = ['selenium==4.8.0', 'pandas==1.5.3', 'webdriver-manager==3.8.5']
     for package in packages:
@@ -28,8 +26,6 @@ def install_packages():
                 [sys.executable, '-m', 'pip', 'install', package])
 
 # Function to initialize the webdriver
-
-
 def initialize_driver(browser_choice):
     if browser_choice == 'Chrome':
         chrome_options = ChromeOptions()
@@ -47,8 +43,6 @@ def initialize_driver(browser_choice):
     return driver
 
 # Function to scrape recent investments
-
-
 def scrape_recent_investments(driver, url):
     driver.get(url)
     time.sleep(10)  # Wait for the page to load completely
@@ -87,8 +81,6 @@ def scrape_recent_investments(driver, url):
     return investments
 
 # Function to save data to CSV
-
-
 def save_to_csv(data):
     if data:
         df = pd.DataFrame(data)
@@ -98,31 +90,43 @@ def save_to_csv(data):
         print("No data found to save.")
 
 # Function to get user inputs via Tkinter
-
-
 def get_user_inputs():
     root = tk.Tk()
     root.withdraw()  # Hide the main window
 
-    browser_choice = simpledialog.askstring(
-        "Input", "Enter browser choice (Chrome/Edge):")
-    api_key = simpledialog.askstring("Input", "Enter your Crunchbase API Key:")
-    crunchbase_url = simpledialog.askstring(
-        "Input", "Enter the Crunchbase URL of the company:")
+    inputs = {}  # Dictionary to store user inputs
 
-    return browser_choice, api_key, crunchbase_url
+    # Descriptions for each input field
+    descriptions = {
+        'browser_choice': "Choose your browser (Chrome or Edge):",
+        'api_key': "Enter your Crunchbase API key:",
+        'crunchbase_url': "Enter the Crunchbase URL to scrape:"
+    }
+
+    # Create entry fields for each input with descriptions
+    for field, description in descriptions.items():
+        value = simpledialog.askstring("Input", description)
+        if value is None:  # If user cancels input, return None
+            return None
+        inputs[field] = value
+
+    return inputs
 
 # Main function
-
-
 def main():
     install_packages()  # Ensure all required packages are installed
 
-    browser_choice, api_key, crunchbase_url = get_user_inputs()
+    user_inputs = get_user_inputs()
 
-    if not browser_choice or not api_key or not crunchbase_url:
+    if not user_inputs:
         print("All inputs are required!")
         return
+
+    browser_choice = user_inputs.get('browser_choice')
+    api_key = user_inputs.get('api_key')
+    crunchbase_url = user_inputs.get('crunchbase_url')
+
+    driver = None  # Initialize the driver variable outside the try block
 
     try:
         driver = initialize_driver(browser_choice)
@@ -133,7 +137,6 @@ def main():
     finally:
         if driver:
             driver.quit()
-
 
 if __name__ == "__main__":
     main()
